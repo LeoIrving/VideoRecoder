@@ -1,3 +1,3 @@
 # VideoRecoder
-This is an old version code source
-New version is ready to be updated soon
+New version is updated
+The app still need to be recreated every few days
