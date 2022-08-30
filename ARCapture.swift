@@ -133,7 +133,11 @@ open class ARCapture {
                     if let complete = complete {
                         self?.addVideoToLibrary(from: url, completed: complete)
                         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
-                        let filePath = "\(documentsPath)/ARVideo.mp4"
+                        let today = Date()
+                        let hour = (Calendar.current.component(.hour, from: today))
+                        let minute = (Calendar.current.component(.minute, from: today))
+                        let second = (Calendar.current.component(.second, from: today))
+                        let filePath = "\(documentsPath)/ARVideo_\(hour):\(minute):\(second).mp4"
                         let urlData = NSData(contentsOf: url)
                         urlData!.write(toFile: filePath, atomically: true)
                         print("Video is saved in Mac : \(filePath)")
