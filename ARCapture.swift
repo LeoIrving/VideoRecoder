@@ -58,6 +58,7 @@ open class ARCapture {
     private var lastPauseTime: CMTime?
     private var summaryDelay: CMTime?
     private var videoUrl: URL?
+    var today = Date()
     
     public init?(view: ARSCNView) {
         self.view = view
@@ -87,6 +88,7 @@ open class ARCapture {
     /// Start recording
     /// - Parameter captureType: the capture type. Different values make sence for landscape orientation of the device. In most cases either rendering is incorrect (due to iOS issue) or UX is not good (due to hacks). Find quality is with `.imageCapture`. For portrait orientation use `.renderOriginal`.
     public func start(captureType: ARFrameGenerator.CaptureType? = nil) {
+        today = Date()
         let type: ARFrameGenerator.CaptureType = captureType ?? (ARCapture.Orientation.isPortrait ? .renderOriginal : .imageCapture)
         frameGenerator = ARFrameGenerator(captureType: type)
 //        if let currentFrame = view.session.currentFrame {
@@ -133,10 +135,10 @@ open class ARCapture {
                     if let complete = complete {
                         self?.addVideoToLibrary(from: url, completed: complete)
                         let documentsPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
-                        let today = Date()
-                        let hour = (Calendar.current.component(.hour, from: today))
-                        let minute = (Calendar.current.component(.minute, from: today))
-                        let second = (Calendar.current.component(.second, from: today))
+                        
+                        let hour = (Calendar.current.component(.hour, from: self!.today))
+                        let minute = (Calendar.current.component(.minute, from: self!.today))
+                        let second = (Calendar.current.component(.second, from: self!.today))
                         let filePath = "\(documentsPath)/ARVideo_\(hour):\(minute):\(second).mp4"
                         let urlData = NSData(contentsOf: url)
                         urlData!.write(toFile: filePath, atomically: true)

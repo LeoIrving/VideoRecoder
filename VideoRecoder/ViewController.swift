@@ -13,14 +13,14 @@ import SceneKit
 import UniformTypeIdentifiers
 
 var is_start = false
-let filename = "position.txt"
-let filename2 = "rotation.txt"
+var filename = "position.txt"
+var filename2 = "rotation.txt"
 // Cannot output the data to desktop because no Permission
 
 let dirURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-let fileURL = dirURL.appendingPathComponent(filename)
+var fileURL = dirURL.appendingPathComponent(filename)
 let dirURL2 = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
-let fileURL2 = dirURL2.appendingPathComponent(filename2)
+var fileURL2 = dirURL2.appendingPathComponent(filename2)
 
 
 
@@ -28,6 +28,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     var videoAndImageReview = UIImagePickerController()
     var videoURL : URL?
+    @IBOutlet weak var button: UIButton!
+    @IBOutlet weak var signal: UILabel!
     
     private var capture: ARCapture?
     @IBOutlet var sceneView: ARSCNView!
@@ -36,22 +38,22 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         super.viewDidLoad()
         capture = ARCapture(view: sceneView!)
         
-//        var isDir: ObjCBool = true
-//        if !FileManager.default.fileExists(atPath: dirURL.path, isDirectory: &isDir) {
-//                do {
-//                    try FileManager.default.createDirectory(atPath: dirURL.path, withIntermediateDirectories: true, attributes: nil)
-//                } catch {
-//                    print(error)
-//                }
-//        }
-//        var isDir2: ObjCBool = true
-//        if !FileManager.default.fileExists(atPath: dirURL2.path, isDirectory: &isDir2) {
-//                do {
-//                    try FileManager.default.createDirectory(atPath: dirURL2.path, withIntermediateDirectories: true, attributes: nil)
-//                } catch {
-//                    print(error)
-//                }
-//        }
+        var isDir: ObjCBool = true
+        if !FileManager.default.fileExists(atPath: dirURL.path, isDirectory: &isDir) {
+                do {
+                    try FileManager.default.createDirectory(atPath: dirURL.path, withIntermediateDirectories: true, attributes: nil)
+                } catch {
+                    print(error)
+                }
+        }
+        var isDir2: ObjCBool = true
+        if !FileManager.default.fileExists(atPath: dirURL2.path, isDirectory: &isDir2) {
+                do {
+                    try FileManager.default.createDirectory(atPath: dirURL2.path, withIntermediateDirectories: true, attributes: nil)
+                } catch {
+                    print(error)
+                }
+        }
         
     }
     
@@ -64,30 +66,52 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     //recording AR
     @IBAction func ARrecord(_ sender: UIButton){
-        is_start = true
+        if (is_start == false){
         
-        if (FileManager.default.fileExists(atPath: fileURL.path)) {
-            do {
-                try FileManager.default.removeItem(at: fileURL)
-            } catch {
-                print("cannot remove previous file")
-            }
+            is_start = true
+            button.setTitle("Stop", for: .normal)
+            signal.text = "Start Recording"
+            
+            let today = Date()
+            let hour = (Calendar.current.component(.hour, from: today))
+            let minute = (Calendar.current.component(.minute, from: today))
+            let second = (Calendar.current.component(.second, from: today))
+            
+            filename = "position_\(hour):\(minute):\(second).txt"
+            filename2 = "rotation_\(hour):\(minute):\(second).txt"
+            // Cannot output the data to desktop because no Permission
+
+            let dirURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            fileURL = dirURL.appendingPathComponent(filename)
+            let dirURL2 = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+            fileURL2 = dirURL2.appendingPathComponent(filename2)
+            
+//            if (FileManager.default.fileExists(atPath: fileURL.path)) {
+//                do {
+//                    try FileManager.default.removeItem(at: fileURL)
+//                } catch {
+//                    print("cannot remove previous file")
+//                }
+//            }
+//            if (FileManager.default.fileExists(atPath: fileURL2.path)) {
+//                do {
+//                    try FileManager.default.removeItem(at: fileURL2)
+//                } catch {
+//                    print("cannot remove previous file")
+//                }
+//            }
+            
+            capture?.start()
         }
-        if (FileManager.default.fileExists(atPath: fileURL2.path)) {
-            do {
-                try FileManager.default.removeItem(at: fileURL2)
-            } catch {
-                print("cannot remove previous file")
-            }
+        else{
+            is_start = false
+            signal.text = "Recording Stopped"
+            button.setTitle("Start", for: .normal)
+            capture?.stop({(status) in print("Video exported: \(status)")})
         }
-        
-        capture?.start()
     }
     
-    @IBAction func ARstop(_ sender: UIButton){
-        is_start = false
-        capture?.stop({(status) in print("Video exported: \(status)")})
-    }
+    
     
     @IBAction func Save(_ sender: UIBarButtonItem){
             let doc = UIDocumentInteractionController(url: fileURL)
@@ -172,7 +196,6 @@ extension ViewController: ARSessionDelegate{
     }
     
     
-    
     func session(_ session: ARSession, didUpdate frame: ARFrame){
         let transform = frame.camera.transform
         let angle = frame.camera.eulerAngles
@@ -183,8 +206,7 @@ extension ViewController: ARSessionDelegate{
         if is_start == true{
             print("POSE - X:\(position.x) Y:\(position.y) Z:\(position.z)")
             print("ROTAT - X:\(angle.x) Y:\(angle.y) Z:\(angle.z)")
-            
-            
+        
             guard let data1 = str1.data(using: .utf8) else{
                 return
             }
